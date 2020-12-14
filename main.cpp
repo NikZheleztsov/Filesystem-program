@@ -12,27 +12,29 @@ fs::path cur = fs::current_path();
 
 void help () //documentation
 {
-
+    std::cout << "Some kind of documentation\n";
 }
 
 void pwd()
 {
-    std::cout << std::setw(40) << std::setfill('-') << '-' << std::endl;
 
     if (cur.string().size() > 38)
     {
-        std::string new_str = cur.string().substr(cur.string().size() - 38, 38);
-        std::cout  << '|' << std::setw(38) << std::setfill(' ') 
-            << new_str << '|' << std::endl;
+        std::cout << std::setw(cur.string().size() + 2) << std::setfill('-') << '-' << std::endl;
+
+        std::cout << '|' << std::setw(cur.string().size()) << std::setfill(' ') 
+            << cur.string() << '|' << std::endl;
+
+        std::cout << std::setw(cur.string().size() + 2) << std::setfill('-') << '-' << std::endl;
 
     } else {
+        std::cout << std::setw(40) << std::setfill('-') << '-' << std::endl;
 
         std::cout << '|' << std::setw(38) << std::setfill(' ') 
             << cur.string() << '|' << std::endl;
 
+        std::cout << std::setw(40) << std::setfill('-') << '-' << std::endl;
     }
-
-    std::cout << std::setw(40) << std::setfill('-') << '-' << std::endl;
 }
 
 void ls ()
@@ -121,7 +123,7 @@ void cp (std::string& cmd)
 {
     int pos = cmd.rfind(' ', cmd.size());
     if (pos == cmd.size() - 1)
-        cmd = cmd.substr(0, pos);
+        cmd = cmd.substr(0, pos); //name of file
     
     int pos2 = cmd.rfind(' ');
     std::string dest = cmd.substr(pos2 + 1, cmd.size() - pos2 - 1);
@@ -131,9 +133,18 @@ void cp (std::string& cmd)
         dest = dest.substr(0, dest.size() - 1);
 
     cmd = cmd.substr(0, pos2);
+    std::string cmd2 = cmd;
 
-    fs::path p1 = cur/cmd;
-    fs::path p2 = static_cast<fs::path>(dest)/cmd;
+    fs::path p1; //fixed
+    if (static_cast<fs::path>(dest) == cur || dest == cmd)
+        cmd2.insert(cmd.size(), "_cp");
+
+    p1 = cur/cmd;
+    fs::path p2;
+    if (dest == cmd) //if dest isn't declared
+        p2 = cur/cmd2;
+    else
+        p2 = static_cast<fs::path>(dest)/cmd2;
 
     if (fs::exists(cur/cmd) && (fs::is_regular_file(cur/cmd)))
         fs::copy_file(p1, p2);
@@ -184,7 +195,7 @@ int main ()
     std::cout << "It's your turn now)"<< std::endl;
 
     do {
-        printf("\033[0;96mCommand: \033[0m"); //ANSI escape sequences for coloring
+        std::cout << "\033[0;96mCommand: \033[0m"; //ANSI escape sequences for coloring
         getline(std::cin, cmd);
 
         int space = cmd.find(' ', 0);
